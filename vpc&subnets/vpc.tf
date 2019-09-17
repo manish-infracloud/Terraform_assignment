@@ -3,6 +3,7 @@ provider "aws" {
 	//access_key = "${var.access_key}"
 	//secret_key = "${var.secret_key}"
 	region = "${var.region}"
+  version = "~> 2.0"
 }
 
 #resources
@@ -25,12 +26,13 @@ resource "aws_internet_gateway" "igw" {
 
 //The subnet is added inside VPC with its own CIDR block which is a subset of VPC CIDR block inside given availability zone.
 resource "aws_subnet" "subnet_public" {
-  count         = "${var.num_instances}"
+  count         = "${length(var.availability_zone)}"
   vpc_id = "${aws_vpc.vpc.id}"
   cidr_block = "${element(var.cidr_subnet, count.index)}"
   map_public_ip_on_launch = "true"
   availability_zone = "${element(var.availability_zone, count.index)}"
   tags =  {
+    Name = "Subnet-${count.index+1}"
     Environment = "${var.environment_tag}"
   }
 }
@@ -53,7 +55,7 @@ resource "aws_route_table" "rtb_public" {
 //Route table association with our subnet to make it a public subnet
 resource "aws_route_table_association" "rta_subnet_public" {
   count         = "${var.num_instances}"
-  subnet_id      = "${aws_subnet.subnet_public.id}"
+  subnet_id      = "${element(aws_subnet.subnet_public.*.id, count.index)}"
   route_table_id = "${aws_route_table.rtb_public.id}"
 }
 
@@ -90,7 +92,7 @@ resource "aws_instance" "testInstance" {
   count         = "${var.num_instances}"
   ami           = "${var.instance_ami}"
   instance_type = "${var.instance_type}"
-  subnet_id = "${aws_subnet.subnet_public.id}"
+  subnet_id = "${element(aws_subnet.subnet_public.*.id, count.index)}"
   vpc_security_group_ids = ["${aws_security_group.sg_22.id}"]
   key_name = "${aws_key_pair.ec2key.key_name}"
 

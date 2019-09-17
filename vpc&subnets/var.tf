@@ -15,7 +15,7 @@ variable "cidr_vpc" {
 variable "cidr_subnet" {
   description = "CIDR block for the subnet"
   type        = "list"
-  default = ["10.1.0.0/24","10.2.0.0/24","10.3.0.0/24" ]
+  default = ["10.1.0.0/24","10.1.1.0/24","10.1.2.0/24" ]
 }
 variable "availability_zone" {
   description = "availability zone to create subnet"
@@ -44,3 +44,8 @@ variable "num_instances" {
   default     = "3"
   type        = "string"
 }
+
+# variable "id" {
+#   description = "list of ids"
+#   type        = "list"
+# }
